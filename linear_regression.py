@@ -13,13 +13,18 @@ class LinearRegression:
         if intercept:
             ones = np.ones((X.shape[0], 1))
             self.intercept_bool = True
-        X = np.c_[ones, X]
+        X1 = np.c_[ones, X]
         y = np.array(y)
         
-        
-        self.beta = np.linalg.inv(X.T @ X) @ X.T @y
-        self.X = X
+        self.beta = np.linalg.inv(X1.T @ X1) @ X1.T @y
+        self.X = X1
         self.Y = y
+
+    def mean(self, y):
+        mean_v = 0
+        for y_value in y:
+            mean_v += y_value
+        return y_value/len(y)
 
     def predict(self, x_test):
         y_hat = x_test @ self.beta[1:] + self.beta[0]
@@ -153,16 +158,42 @@ class LinearRegression:
     def estimatebeta(self):
         return self.beta
     
+    def RSS(self, X):
+        """Residual sum of squares"""
+        y_hat = self.predict(X)
+        return np.sum((self.Y - y_hat)**2)
+
+    def TSS(self, y):
+        """Total sum of squares"""
+        mu = self.mean(y)
+        return np.sum((self.Y - mu)**2)
+    
+    def score(self, X, y):
+        try: 
+            rss = self.RSS(X)
+            tss = self.TSS(y)
+            
+            # Cleaner logging
+            print(f"RSS: {rss}, TSS: {tss}")
+            
+            # R^2 Formula: 1 - (Residual Sum of Squares / Total Sum of Squares)
+            r2 = 1 - (rss / tss)
+            return r2
+        except ZeroDivisionError:
+            print("Warning: TSS is zero, R2 cannot be calculated.")
+            return 0.0  # Or raise the error depending on your needs
+        
 if "__main__" == __name__:
     df = pd.read_csv("df.csv", index_col=0)
-    X = df[["X1", "X2", "X3", "X4", "X5"]]
-    y = df[["y"]]
+    X = np.array(df[["X1", "X2", "X3", "X4", "X5"]])
+    y = np.array(df[["y"]])
     reg = LinearRegression()
     reg.fit(X, y)
     #reg.fit_ridge(lr=0.01, _lambda = 0.1,epochs=1000, lambda_optim=True)
     reg.fit_lasso(epochs=1000, lr=0.01, _lambda=0.1)
     print(reg.estimatebeta())
-
+    print(reg.score(X, y))
+    exit()
     from sklearn.linear_model import Lasso
     model = Lasso(alpha=0.1) 
     model.fit(X, y)
