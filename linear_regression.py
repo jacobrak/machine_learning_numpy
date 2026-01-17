@@ -158,23 +158,20 @@ class LinearRegression:
     def estimatebeta(self):
         return self.beta
     
-    def RSS(self, X):
+    def RSS(self, X, y):
         """Residual sum of squares"""
         y_hat = self.predict(X)
-        return np.sum((self.Y - y_hat)**2)
+        return np.sum((y - y_hat)**2)
 
     def TSS(self, y):
         """Total sum of squares"""
         mu = self.mean(y)
-        return np.sum((self.Y - mu)**2)
+        return np.sum((y - mu)**2)
     
     def score(self, X, y):
         try: 
-            rss = self.RSS(X)
+            rss = self.RSS(X, y)
             tss = self.TSS(y)
-            
-            # Cleaner logging
-            print(f"RSS: {rss}, TSS: {tss}")
             
             # R^2 Formula: 1 - (Residual Sum of Squares / Total Sum of Squares)
             r2 = 1 - (rss / tss)
@@ -182,17 +179,25 @@ class LinearRegression:
         except ZeroDivisionError:
             print("Warning: TSS is zero, R2 cannot be calculated.")
             return 0.0  # Or raise the error depending on your needs
-        
+    
+    def summary(self, X, y):
+        n = len(y)
+        r2 = self.score(X, y)
+        mse = self.RSS(X, y) * 1/n
+        rmse = np.sqrt(mse)
+        y_mu = float(self.mean(y))
+        return (f"R^2:{r2:.2f} \nMSE:{mse:.2f} \nRMSE:{rmse:.2f} \nymean:{y_mu:.2f}")
+
 if "__main__" == __name__:
     df = pd.read_csv("df.csv", index_col=0)
     X = np.array(df[["X1", "X2", "X3", "X4", "X5"]])
     y = np.array(df[["y"]])
     reg = LinearRegression()
     reg.fit(X, y)
+    print(reg.score(X, y))
     #reg.fit_ridge(lr=0.01, _lambda = 0.1,epochs=1000, lambda_optim=True)
     reg.fit_lasso(epochs=1000, lr=0.01, _lambda=0.1)
-    print(reg.estimatebeta())
-    print(reg.score(X, y))
+    print(reg.summary(X, y))
     exit()
     from sklearn.linear_model import Lasso
     model = Lasso(alpha=0.1) 
