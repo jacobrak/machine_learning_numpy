@@ -181,12 +181,28 @@ class LinearRegression:
             return 0.0  # Or raise the error depending on your needs
     
     def summary(self, X, y):
+        
         n = len(y)
         r2 = self.score(X, y)
         mse = self.RSS(X, y) * 1/n
         rmse = np.sqrt(mse)
-        y_mu = float(self.mean(y))
-        return (f"R^2:{r2:.2f} \nMSE:{mse:.2f} \nRMSE:{rmse:.2f} \nymean:{y_mu:.2f}")
+        y_mu = self.mean(y).item()
+        output = ""
+        i = 0
+        output += "------------------Coefficients------------------" + "\n"
+        if self.intercept_bool:
+            output += f"intecept:{self.beta[0].item():.3f} \n"
+            i = 1
+        
+        while i < len(self.beta):
+            output += f"beta{i}: {self.beta[i].item():.3f} \n"
+            i += 1
+
+        output += "\n"
+        output += "Key Metrics for Regression: \n"
+        output += (f"R^2:{r2:.2f} \nMSE:{mse:.2f} \nRMSE:{rmse:.2f} \nymean:{y_mu:.2f}\n")
+        output += "------------------------------------------------"
+        return output
 
 if "__main__" == __name__:
     df = pd.read_csv("df.csv", index_col=0)
