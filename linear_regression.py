@@ -26,7 +26,9 @@ class LinearRegression:
         return y_hat 
     
     def fit_lasso(self, _lambda=0.1, lr=0.01, epochs=1000, lr_decay=_sqrt_decay, lambda_optim=False):
-        """ This is the iterative version to find L1 betas """
+        """ 
+        fit_lasso uses gradient descentto minimize the cost functions technically incorrect, better apporaches exist but easiest to implemnet.
+        """
         global_loss = math.inf
         best_beta, start_beta = self.beta.copy(), self.beta.copy()
         n_samples, n_features = self.X.shape
